@@ -1,13 +1,26 @@
 import os
 import json
 import numpy as np
+from helpers import get_bbox_area
 
-def compute_iou(box_1, box_2):
+
+def compute_iou(box1, box2):
     '''
     This function takes a pair of bounding boxes and returns intersection-over-
     union (IoU) of two bounding boxes.
     '''
-    iou = np.random.random()
+    # intersection box coords
+    inter = [max(box1[0], box2[0]),  # row top left
+             max(box1[1], box2[1]),  # col top left
+             min(box1[2], box2[2]),  # row bottom right
+             min(box1[3], box2[3])]  # col bottom right
+    
+    inter_area = get_bbox_area(inter)
+    box1_area = get_bbox_area(box1)
+    box2_area = get_bbox_area(box2)
+    union_area = box1_area + box2_area - inter_area
+    
+    iou = inter_area / union_area
     
     assert (iou >= 0) and (iou <= 1.0)
 
@@ -52,7 +65,7 @@ gts_path = '../data/hw02_annotations'
 # load splits:
 split_path = '../data/hw02_splits'
 file_names_train = np.load(os.path.join(split_path,'file_names_train.npy'))
-file_names_test = np.load(os.path.join(split_Path,'file_names_test.npy'))
+file_names_test = np.load(os.path.join(split_path,'file_names_test.npy'))
 
 # Set this parameter to True when you're done with algorithm development:
 done_tweaking = False

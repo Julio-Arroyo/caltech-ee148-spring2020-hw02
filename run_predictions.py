@@ -8,18 +8,31 @@ def compute_convolution(I, T, stride=None):
     This function takes an image <I> and a template <T> (both numpy arrays) 
     and returns a heatmap where each grid represents the output produced by 
     convolution at each location. You can add optional parameters (e.g. stride, 
-    window_size, padding) to create additional functionality. 
+    window_size, padding) to create additional functionality.
     '''
-    (n_rows,n_cols,n_channels) = np.shape(I)
+    (n_rows, n_cols, n_channels) = np.shape(I)
+    (f_rows, f_cols, fchannels) = np.shape(T)  # filter dimensions
 
-    '''
-    BEGIN YOUR CODE
-    '''
-    heatmap = np.random.random((n_rows, n_cols))
+    assert n_channels == fchannels
+    assert n_rows >= f_rows
+    assert n_cols >= f_cols
 
-    '''
-    END YOUR CODE
-    '''
+    # heatmap dimensions
+    (hm_rows, hm_cols) = ((n_rows - f_rows + 1) // stride,
+                          (n_cols - f_cols + 1) // stride)
+    heatmap = np.zeros((hm_rows, hm_cols))
+    filter_vec = T.flatten()
+    filter_vec = (1/np.linalg.norm(filter_vec)) * filter_vec  # light invariance
+
+    for i in range(hm_rows):
+        for j in range(hm_cols):
+            window = I[i: i + f_rows, j: j + f_cols]
+            assert (np.shape(window) == np.shape(T),
+                    f'Window, filter mismatch. (i,j)=({i, j}), window shape: {np.shape(window)}, I shape: {np.shape(I)}, T shape: {np.shape(T)}')
+
+            window_vec = window.flatten()
+            window_vec = (1 / np.linalg.norm(window_vec)) * window_vec
+            heatmap[i, j] = np.inner(window_vec, filter_vec)
 
     return heatmap
 
@@ -29,7 +42,8 @@ def predict_boxes(heatmap):
     This function takes heatmap and returns the bounding boxes and associated
     confidence scores.
     '''
-
+    # IDEA 1: if local max (greater than all its neighbors), predict box around it
+    # IDEA 2: hyperparameter threshold, predict box all around area above threshold
     output = []
 
     '''
@@ -110,7 +124,7 @@ data_path = '../data/RedLights2011_Medium'
 # load splits: 
 split_path = '../data/hw02_splits'
 file_names_train = np.load(os.path.join(split_path,'file_names_train.npy'))
-file_names_test = np.load(os.path.join(split_Path,'file_names_test.npy'))
+file_names_test = np.load(os.path.join(split_path,'file_names_test.npy'))
 
 # set a path for saving predictions:
 preds_path = '../data/hw02_preds'

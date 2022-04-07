@@ -119,7 +119,7 @@ def detect_red_light_mf(I):
 
 # Note that you are not allowed to use test data for training.
 # set the path to the downloaded data:
-data_path = '../data/RedLights2011_Medium'
+data_path = '/Users/jarroyo/OneDrive - California Institute of Technology/Courses/2022Spring/CS148/RedLights2011_Medium'
 
 # load splits: 
 split_path = '../data/hw02_splits'

@@ -2,6 +2,12 @@ import os
 import numpy as np
 import json
 from PIL import Image
+import matplotlib.pyplot as plt
+
+
+# to get filter: images 10, 308, 331, 307, 300, 299, 172, 162, 158
+# types: far, normal, close, night
+
 
 def compute_convolution(I, T, stride=None):
     '''
@@ -94,7 +100,7 @@ def detect_red_light_mf(I):
     I[:,:,1] is the green channel
     I[:,:,2] is the blue channel
     '''
-
+    # IDEA: use scanning to search for red, then used matched filtering at those locations
     '''
     BEGIN YOUR CODE
     '''
@@ -122,12 +128,12 @@ def detect_red_light_mf(I):
 data_path = '/Users/jarroyo/OneDrive - California Institute of Technology/Courses/2022Spring/CS148/RedLights2011_Medium'
 
 # load splits: 
-split_path = '../data/hw02_splits'
+split_path = './data'
 file_names_train = np.load(os.path.join(split_path,'file_names_train.npy'))
 file_names_test = np.load(os.path.join(split_path,'file_names_test.npy'))
 
 # set a path for saving predictions:
-preds_path = '../data/hw02_preds'
+preds_path = './preds'
 os.makedirs(preds_path, exist_ok=True) # create directory if needed
 
 # Set this parameter to True when you're done with algorithm development:
@@ -145,7 +151,8 @@ for i in range(len(file_names_train)):
     # convert to numpy array:
     I = np.asarray(I)
 
-    preds_train[file_names_train[i]] = detect_red_light_mf(I)
+    # preds_train[file_names_train[i]] = detect_red_light_mf(I)
+    heatmap = plt.imshow(compute)
 
 # save preds (overwrites any previous predictions!)
 with open(os.path.join(preds_path,'preds_train.json'),'w') as f:

@@ -1,4 +1,5 @@
 import os
+import copy
 import json
 import numpy as np
 from helpers import get_bbox_area
@@ -42,37 +43,42 @@ def compute_counts(preds, gts, iou_thr=0.5, conf_thr=0.5):
     FP = 0
     FN = 0
 
-    '''
-    BEGIN YOUR CODE
-    '''
-    for pred_file, pred in preds.iteritems():
-        gt = gts[pred_file]
+    for pred_file, predictions in preds.iteritems():
+        gt = copy.deepcopy(gts[pred_file])
+        pred = copy.deepcopy(predictions)
         for i in range(len(gt)):
-            for j in range(len(pred)):
+            found_match = False
+            for j in range(len(predictions)):
+                if pred[j] is None:
+                    continue
                 iou = compute_iou(pred[j][:4], gt[i])
-
-
-    '''
-    END YOUR CODE
-    '''
-
+                confidence = pred[j][4]
+                if iou > iou_thr and confidence > conf_thr:
+                    found_match = True
+                    TP += 1
+                    pred[j] = None
+                    break
+            if not found_match:
+                FN += 1
+        for curr_pred in pred:
+            if curr_pred is not None:
+                FP  += 1
     return TP, FP, FN
 
+
 # set a path for predictions and annotations:
-preds_path = '../data/hw02_preds'
-gts_path = '../data/hw02_annotations'
+preds_path = '/preds'
+gts_path = '/data/ground_truth'
 
 # load splits:
-split_path = '../data/hw02_splits'
+split_path = '/data'
 file_names_train = np.load(os.path.join(split_path,'file_names_train.npy'))
 file_names_test = np.load(os.path.join(split_path,'file_names_test.npy'))
 
 # Set this parameter to True when you're done with algorithm development:
 done_tweaking = False
 
-'''
-Load training data. 
-'''
+# Load training predictions
 with open(os.path.join(preds_path,'preds_train.json'),'r') as f:
     preds_train = json.load(f)
     
@@ -94,8 +100,6 @@ if done_tweaking:
 
 # For a fixed IoU threshold, vary the confidence thresholds.
 # The code below gives an example on the training set for one IoU threshold. 
-
-
 confidence_thrs = np.sort(np.array([preds_train[fname][4] for fname in preds_train],dtype=float)) # using (ascending) list of confidence scores as thresholds
 tp_train = np.zeros(len(confidence_thrs))
 fp_train = np.zeros(len(confidence_thrs))

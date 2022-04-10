@@ -3,6 +3,10 @@ import numpy as np
 import json
 
 
+# to get filter: images 10, 308, 331, 307, 300, 299, 172, 162, 158
+# types: far, normal, close, night
+
+
 data_path = '/Users/jarroyo/OneDrive - California Institute of Technology/Courses/2022Spring/CS148/RedLights2011_Medium'
 
 def save_filter(img, bbox, fname):

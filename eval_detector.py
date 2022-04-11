@@ -46,25 +46,30 @@ def compute_counts(preds, gts, iou_thr=0.5, conf_thr=0.5):
     FN = 0
 
     for pred_file, predictions in preds.items():
-        gt = copy.deepcopy(gts[pred_file])
-        pred = copy.deepcopy(predictions)
-        for i in range(len(gt)):
-            found_match = False
-            for j in range(len(predictions)):
-                if pred[j] is None:
-                    continue
-                iou = compute_iou(pred[j][:4], gt[i])
-                confidence = pred[j][4]
-                if iou > iou_thr and confidence > conf_thr:
-                    found_match = True
+        # pre-select only the confident predictions
+        confident_preds = []
+        for curr_pred in predictions:
+            if curr_pred[4] > conf_thr:
+                confident_preds.append(curr_pred)
+
+        gts_set = set()
+        for gt in gts[pred_file]:
+            gts_set.add(tuple(gt[:4]))  # add each bounding box
+        preds_set = set()
+        for curr_pred in confident_preds:
+            preds_set.add(tuple(curr_pred[:4]))  # add each prediction
+
+        for curr_pred in confident_preds:
+            # for each prediction, try to find a ground truth to match it to
+            for curr_gt in gts[pred_file]:
+                iou = compute_iou(curr_pred[:4], curr_gt[:4])
+                if iou > iou_thr:
                     TP += 1
-                    pred[j] = None
+                    gts_set.remove(tuple(curr_gt[:4]))
+                    preds_set.remove(tuple(curr_pred[:4]))
                     break
-            if not found_match:
-                FN += 1
-        for curr_pred in pred:
-            if curr_pred is not None:
-                FP  += 1
+        FP += len(preds_set)  # if a prediction did not have a ground truth to match to, it is a false positive
+        FN += len(gts_set)  # if no prediction was found to match a ground truth, that gt is a false negative
     return TP, FP, FN
 
 
@@ -74,14 +79,14 @@ gts_path = 'data/ground_truth'
 
 # load splits:
 split_path = 'data/'
-file_names_train = np.load(os.path.join(split_path,'file_names_train.npy'))
-file_names_test = np.load(os.path.join(split_path,'file_names_test.npy'))
+file_names_train = np.load(os.path.join(split_path, 'file_names_train.npy'))
+file_names_test = np.load(os.path.join(split_path, 'file_names_test.npy'))
 
 # Set this parameter to True when you're done with algorithm development:
 done_tweaking = False
 
 # Load training predictions
-with open(os.path.join(preds_path,'preds_train_find_red.json'),'r') as f:
+with open(os.path.join(preds_path, 'preds_train_matched_filtering.json'),'r') as f:
     preds_train = json.load(f)
     
 with open(os.path.join(gts_path, 'formatted_annotations_students_2021.json'),'r') as f:

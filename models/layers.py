@@ -1,6 +1,19 @@
 import numpy as np
 
 
+def matr_prod(m1, m2):
+    assert np.shape(m1) == np.shape(m2)
+
+    m1_vec = m1.flatten()
+    m2_vec = m2.flatten()
+
+    # light invariance
+    m1_vec = (1 / np.linalg.norm(m1_vec)) * m1_vec
+    m2_vec = (1 / np.linalg.norm(m2_vec)) * m2_vec
+
+    return np.inner(m1_vec, m2_vec)
+
+
 def compute_convolution(I, T, stride=1):
     '''
     This function takes an image <I> and a template <T> (both numpy arrays) 
@@ -44,8 +57,8 @@ def pool(I, pool_type, window_size=2, stride=1):
     I_out = np.zeros((out_rows, out_cols, n_channels))
 
     for k in range(n_channels):
-        for i in range(0, n_rows, stride):
-            for j in range(0, n_cols, stride):
+        for i in range(out_rows):
+            for j in range(out_cols):
                 window = I[i: i + window_size, j: j + window_size, k]
                 if pool_type == 'avg':
                     I_out[i, j, k] = np.mean(window)

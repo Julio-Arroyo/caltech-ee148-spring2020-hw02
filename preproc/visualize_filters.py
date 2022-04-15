@@ -3,6 +3,6 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    for filter_name in ['large', 'medium', 'tiny', 'night']:
-        flt = np.load(f'{filter_name}.npy')
-        plt.imsave(f'{filter_name}.jpg', flt)
+    for i in range(4):
+        flt = np.load(f'preproc/filter{i}.npy')
+        plt.imsave(f'preproc/filter{i}.jpg', flt)

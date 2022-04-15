@@ -5,7 +5,7 @@ import json
 
 
 if __name__ == '__main__':
-    algo = 'matched_filtering'  # find_red, matched_filtering
+    algo = 'ensemble'  # find_red, matched_filtering, ensemble
     # preds_path = f'./data/hw01_preds/{algo}'
     annotators = 'students_2021'  #students_2021, students_2020, mturk
     gts_path = f'data/ground_truth'

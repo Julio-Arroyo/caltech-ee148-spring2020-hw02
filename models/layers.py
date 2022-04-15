@@ -2,7 +2,8 @@ import numpy as np
 
 
 def matr_prod(m1, m2):
-    assert np.shape(m1) == np.shape(m2)
+    if not np.shape(m1) == np.shape(m2):
+        return 0
 
     m1_vec = m1.flatten()
     m2_vec = m2.flatten()
